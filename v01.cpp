@@ -134,14 +134,30 @@ int main() {
             }
             testi = 't';
         } else if (meniu_pasirinkimas == '3') {
-            ifstream failas("kursiokai.txt");
+            string failo_pavadinimas;
+            cout << "Iveskite failo pavadinima: ";
+            cin >> failo_pavadinimas;
+            
+            ifstream failas(failo_pavadinimas);
             if (!failas.is_open()) {
-                cout << "Nepavyko atidaryti failo: kursiokai.txt" << endl;
+                cout << "Nepavyko atidaryti failo: " << failo_pavadinimas << endl;
                 continue;
             }
             
             string eilute;
-            getline(failas, eilute);
+            getline(failas, eilute); // Nuskaitome antraštės eilutę
+            
+            // Nustatome ND stulpelių skaičių iš antraštės
+            istringstream header_iss(eilute);
+            string stulpelis;
+            int nd_stulpeliu_skaicius = 0;
+            while (header_iss >> stulpelis) {
+                if (stulpelis.substr(0, 2) == "ND") {
+                    nd_stulpeliu_skaicius++;
+                }
+            }
+            
+            cout << "Aptiktas " << nd_stulpeliu_skaicius << " ND stulpeliu skaicius" << endl;
             
             int nuskaityta = 0;
             while (getline(failas, eilute)) {
@@ -152,12 +168,14 @@ int main() {
                 iss >> studentas.pavarde >> studentas.vardas;
                 
                 int pazymys;
+                int pazymiu_skaicius = 0;
                 while (iss >> pazymys) {
-                    if (studentas.nd.size() < 5) {
+                    if (pazymiu_skaicius < nd_stulpeliu_skaicius) {
                         studentas.nd.push_back(pazymys);
                     } else {
                         studentas.egzaminas = pazymys;
                     }
+                    pazymiu_skaicius++;
                 }
                 
                 studentai.push_back(studentas);
