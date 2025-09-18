@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <ctime>
 #include <string>
+#include <fstream>
+#include <sstream>
 using namespace std;
 
 struct Studentas {
@@ -45,8 +47,9 @@ int main() {
         cout << endl << "MENU" << endl;
         cout << "1. Sarasas" << endl;
         cout << "2. Prideti studenta" << endl;
-        cout << "3. Stabdyti programa" << endl;
-        cout << "Pasirinkite veiksma (1-3): ";
+        cout << "3. Nuskaityti is failo" << endl;
+        cout << "4. Stabdyti programa" << endl;
+        cout << "Pasirinkite veiksma (1-4): ";
         cin >> meniu_pasirinkimas;
 
         if (meniu_pasirinkimas == '1') {
@@ -131,6 +134,39 @@ int main() {
             }
             testi = 't';
         } else if (meniu_pasirinkimas == '3') {
+            ifstream failas("kursiokai.txt");
+            if (!failas.is_open()) {
+                cout << "Nepavyko atidaryti failo: kursiokai.txt" << endl;
+                continue;
+            }
+            
+            string eilute;
+            getline(failas, eilute);
+            
+            int nuskaityta = 0;
+            while (getline(failas, eilute)) {
+                if (eilute.empty()) continue;
+                
+                Studentas studentas;
+                istringstream iss(eilute);
+                iss >> studentas.pavarde >> studentas.vardas;
+                
+                int pazymys;
+                while (iss >> pazymys) {
+                    if (studentas.nd.size() < 5) {
+                        studentas.nd.push_back(pazymys);
+                    } else {
+                        studentas.egzaminas = pazymys;
+                    }
+                }
+                
+                studentai.push_back(studentas);
+                nuskaityta++;
+            }
+            
+            failas.close();
+            cout << "Nuskaityta " << nuskaityta << " studentu is failo!" << endl;
+        } else if (meniu_pasirinkimas == '4') {
             cout << "Programa stabdoma..." << endl;
             break;
         } else {
