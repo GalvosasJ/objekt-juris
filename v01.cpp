@@ -42,7 +42,7 @@ int main() {
 
     cout << "Vardas" << setw(15) << "Pavarde" << setw(35) << "Galutinis (Vid.)" << endl;
     cout << "--------------------------------------------------------------" << endl;
-    cout << studentas.vardas << setw(15) << studentas.pavarde << setw(15) << galutinis << endl;
+    cout << fixed << setprecision(2) << studentas.vardas << setw(15) << studentas.pavarde << setw(15) << galutinis << endl;
 
 
     return 0;
