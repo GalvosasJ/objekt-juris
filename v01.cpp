@@ -52,6 +52,9 @@ int main() {
             getline(cin, eilute);
         }
         
+        cout << "Iveskite egzamino pazymi: ";
+        cin >> studentas.egzaminas;
+        
         studentai.push_back(studentas);
         
         cout << "Ar norite ivesti kita studenta? (t - taip, n - ne): ";
