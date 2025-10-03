@@ -34,8 +34,9 @@ static void print_usage(const char* prog) {
     "  Generuoti failą:\n"
     "    " << prog << " gen <n> <out_path> [nd_count=5] [seed=0]\n\n"
     "  Padalinti studentus:\n"
-    "    " << prog << " split <input> <out_base> [mode=vid|med] [threshold=5.0]\n"
-    "      -> sukuria: <out_base>_vargsiukai.txt ir <out_base>_kietiakiai.txt\n";
+    "    " << prog << " split <input> <out_base> [mode=vid|med] [threshold=5.0]\n\n"
+    "  Bench režimas (1k, 10k, 100k, 1M, 10M):\n"
+    "    " << prog << " bench [nd_count=5]\n";
 }
 
 int main(int argc, char** argv) {
@@ -96,6 +97,45 @@ int main(int argc, char** argv) {
             std::cout << "         skaitymas: " << t_read  << " s\n";
             std::cout << "         dalinimas: " << t_split << " s\n";
             std::cout << "         rašymas:   " << t_write << " s\n";
+        }
+        else if (cmd == "bench") {
+            int ndc = (argc >= 3) ? std::stoi(argv[2]) : 5;
+            std::vector<size_t> sizes = {1000, 10000, 100000, 1000000, 10000000};
+
+            for (auto n : sizes) {
+                std::string src = "students_" + std::to_string(n) + ".txt";
+
+                // 1) Generavimas
+                double gen_s = generate_students_file(GenOptions{n, ndc, 0u, src});
+                std::cout << "[GEN] N=" << n << " per " << gen_s << " s\n";
+
+                // 2) Padalinimas
+                std::ofstream out_low("students_" + std::to_string(n) + "_vargsiukai.txt");
+                std::ofstream out_high("students_" + std::to_string(n) + "_kietiakiai.txt");
+
+                out_low  << "Vardas Pavarde Galutinis\n";
+                out_high << "Vardas Pavarde Galutinis\n";
+
+                double t_read=0, t_split=0, t_write=0;
+                auto count = process_students_streaming(
+                    src,
+                    [](const std::string& line, int ndc){
+                        return compute_final_from_line(line, ndc, /*use median*/ false);
+                    },
+                    [&](const std::string& v, const std::string& p, double g){
+                        out_low << v << ' ' << p << ' ' << g << '\n';
+                    },
+                    [&](const std::string& v, const std::string& p, double g){
+                        out_high << v << ' ' << p << ' ' << g << '\n';
+                    },
+                    5.0, t_read, t_split, t_write
+                );
+
+                std::cout << "[SPLIT] N=" << count
+                          << " read=" << t_read  << " s"
+                          << " split=" << t_split << " s"
+                          << " write=" << t_write << " s\n";
+            }
         }
         else {
             print_usage(argv[0]);
