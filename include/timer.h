@@ -6,5 +6,7 @@ struct Tick {
     Tick() : t(std::chrono::high_resolution_clock::now()) {}
 };
 
-// Grąžina kiek sekundžių praėjo nuo starto
-double seconds_since(const Tick& start);
+inline double seconds_since(const Tick& start) {
+    using namespace std::chrono;
+    return duration<double>(high_resolution_clock::now() - start.t).count();
+}
